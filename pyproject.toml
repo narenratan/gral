@@ -1,0 +1,34 @@
+[project]
+name = "gral"
+version = "0.1.0"
+description = "Keyboard mapping scripts"
+readme = "README.md"
+authors = [
+    { name = "Naren Ratan", email = "narenr@fastmail.com" }
+]
+requires-python = ">=3.8"
+dependencies = [
+    "mtsespy",
+    "tuning-library",
+    "pandas",
+    "sympy",
+    "mido",
+    "python-rtmidi",
+    "ortools",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-cov",
+]
+
+[project.scripts]
+gral-search = "gral.gral_search:main"
+scale-degree = "gral.scale_degree:main"
+harmonic-template = "gral.harmonic_template:main"
+box-opt = "gral.box_opt:main"
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
