@@ -240,3 +240,7 @@ Wrote baglama-template.csv
 ```
 The step sizes for the grid are printed; here every note is within 20 cents of
 a grid with x step size 203.08 cents, y step size 85.32 cents.
+
+The scl files for scales used in the article can be found in
+[scale-library](https://scalelibrary.org), also available as a [Python
+package](https://pypi.org/project/scale-library/).
