@@ -1,6 +1,8 @@
 # GRAL
 
-Scripts accompanying the article *Another look at Wilson's keyboard mapping system*.
+Scripts accompanying the Xenharmonikon article [Another look at Wilson's
+keyboard mapping
+system](https://www.xenharmonikon.org/2026/05/19/another-look-at-wilsons-keyboard-mapping-system/).
 
 ## gral-search
 
