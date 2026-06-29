@@ -9,23 +9,12 @@ body {
 }
 
 h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
 }
 
 h2 {
     font-size: 1rem;
-    margin-top: 1.5rem;
-}
-
-.subtitle {
-    color: #666;
-    font-style: italic;
-}
-
-nav {
-    margin-top: 1.5rem;
-    display: flex;
-    gap: 1rem;
+    margin-top: 1.75rem;
 }
 
 code {
