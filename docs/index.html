@@ -6,6 +6,13 @@
   <meta name="google-site-verification" content="-bkfCbpf6gb7SDlrLJV39CqUBd56KOAKCumcDn4mHAI" />
   <title>GRAL: Tools for Erv Wilson's keyboard mapping system</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+      onload="renderMathInElement(document.body, {delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+      ]});"></script>
 </head>
 <body>
 <h1 id="gral">GRAL: Tools for Erv Wilson's keyboard mapping system</h1>
@@ -20,15 +27,449 @@ href="https://github.com/narenratan/gral">repo on github</a>.</p>
     A portion of Erv Wilson’s keyboard mapping system can be expressed in a few equations.
     Personally I find that the equations help to apply and understand the system.
     This article presents the equations and gives examples of their use.
-    Section 2 gives some context.
-    Section 3 defines lattice bases.
-    Section 4 presents mapping based on scale degree.
-    Section 5 presents mapping using harmonic templates, including an optimization problem for finding nice keyboard mappings.
-    Section 6 discusses chain position and keyboard coordinates.
-    Section 7 describes musical notations based on keyboard mappings.
-    Section 8 discusses playing the keyboard mappings on a Launchpad MIDI controller (the fun part!).
   </p>
 </details>
+
+<h2>Key equations</h2>
+
+<h3>Lattice bases</h3>
+
+<p>
+The keys on the keyboard are labeled by pairs of integers $(x, y)$, their $x$ and $y$ coordinates.
+The set of all these integer pairs is called a lattice.
+For two lattice points $(a, b)$ and $(c, d)$, if we can write any lattice point $(x, y)$ as
+</p>
+
+<div>
+$$
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+    =
+    p
+\begin{bmatrix}
+    a \\
+    b \\
+\end{bmatrix}
+    +
+    q
+\begin{bmatrix}
+    c \\
+    d \\
+\end{bmatrix}
+$$
+</div>
+
+<p>
+with integer $p$ and $q$, we say $(a, b)$ and $(c, d)$ form a basis for the lattice.
+Two points $(a, b)$ and $(c, d)$ form a basis if and only if
+</p>
+
+<div>
+$$ ad - bc = \pm 1 $$
+</div>
+
+<h3>Scale degree mapping</h3>
+
+<p>
+One way to map a scale is by always going up $s$ scale degrees when moving one key along a row,
+and $t$ scale degrees when moving one key up a column, for some step sizes $s$ and $t$.
+</p>
+
+<p>
+If we choose scale degrees $m$ and $n$ which we want to form a basis
+on the keyboard, we can solve for $s$ and $t$. Say the basis is $(a, b)$, $(c,
+d)$. The conditions that scale degree $m$ is mapped to $(a, b)$ and scale
+degree $n$ is mapped to $(c, d)$ give two equations
+</p>
+
+<div>
+$$
+\begin{aligned}
+    a s + b t &= m \\
+    c s + d t &= n
+\end{aligned}
+$$
+</div>
+
+<p>
+which we can solve for the step sizes $s$ and $t$ to give
+</p>
+
+<div>
+$$
+\begin{aligned}
+    s &= \frac{dm-bn}{\Delta} \\
+    t &= \frac{-cm + an}{\Delta}
+\end{aligned}
+$$
+</div>
+
+<p>
+where $\Delta = ad - bc = \pm 1$.
+</p>
+
+<p>
+Now say we want the step sizes to be positive, so scale degree (and so pitch)
+increases along a row and up a column. This gives the conditions
+</p>
+
+<div>
+$$
+\begin{aligned}
+    \frac{ dm - bn}{\Delta} & > 0\\
+    \frac{-cm + an}{\Delta} & > 0
+\end{aligned}
+$$
+</div>
+
+<p>
+If $\Delta = -1$, $c > 0$, and $d > 0$, these conditions are equivalent to
+</p>
+
+<div>
+$$
+    \frac{a}{c} < \frac{m}{n} < \frac{b}{d}
+$$
+</div>
+
+<p>
+For a given $m/n$, Wilson's Gral method finds all bases $(a, b)$, $(c, d)$  with
+</p>
+<ul>
+    <li>$\Delta = ad - bc = -1$</li>
+    <li>$a/c < m/n < b/d$</li>
+    <li>$a, b, c, d \geq 0$</li>
+</ul>
+
+<p>
+The Gral method is a binary search for the fraction $m/n$, starting with the
+interval $[0/1, 1/0]$ and 'bisecting' each interval $[a/c, b/d]$ with the
+mediant $(a+b)/(c+d)$.
+Each interval $[a/c, b/d]$ we encounter in the search has $ad - bc = -1$,
+so $(a, b)$, $(c, d)$ form a basis,
+and $a/c < m/n < b/d$ since $m/n$ is in each search interval.
+</p>
+
+<h3>Harmonic template mapping</h3>
+
+<p>
+A harmonic template shows where each octave-reduce harmonic maps onto the keyboard.
+For example:
+</p>
+
+<pre>
+    *   *  7/4  *  2/1
+  11/8  *   *   *   *
+    *   *   *  3/2  *
+    *   *  5/4  *   *
+    *   *   *   *   *
+    *   *  1/1  *   *
+</pre>
+
+<p>
+A given ratio is then mapped to the keyboard by writing it as a product of the octave-reduced harmonics,
+and moving by the step in the template for each factor.
+This can be written using matrix multiplication;
+for a given ratio, collecting the exponents of each octave-reduced harmonic in its factorization into a vector $V$,
+the ratio is mapped to a position $X = (x, y)$ on the keyboard with
+</p>
+
+<div>
+$$
+    X = A V
+$$
+</div>
+
+<p>
+where $A$ is the matrix representing the harmonic template.
+</p>
+
+<p>
+For the example harmonic template above, the matrix $A$ is
+</p>
+
+<div>
+$$
+A =
+\begin{bmatrix}
+ 2 & 1 & 0 & 0 & -2 \\
+ 5 & 3 & 2 & 5 & 4
+\end{bmatrix}
+$$
+</div>
+
+<p>
+where the columns are the $x$ and $y$ coordinates of $2/1$, $3/2$, $5/4$, $7/4$, and $11/8$ in the harmonic template.
+The ratio $15/8 = 3/2 \cdot 5/4$ has the vector of exponents $V = [0, 1, 1, 0, 0]$, and is so mapped to
+</p>
+
+<div>
+$$
+\begin{aligned}
+X
+    &=
+A V \\
+    &=
+\begin{bmatrix}
+ 2 & 1 & 0 & 0 & -2 \\
+ 5 & 3 & 2 & 5 & 4
+\end{bmatrix}
+\begin{bmatrix}
+ 0 \\
+ 1 \\
+ 1 \\
+ 0 \\
+ 0 \\
+\end{bmatrix} \\
+    &=
+\begin{bmatrix}
+ 1 \\
+ 5
+\end{bmatrix}
+\end{aligned}
+$$
+</div>
+
+<p>
+that is to $x = 1$, $y = 5$.
+</p>
+
+<h3>Chain position and keyboard coordinates</h3>
+
+<h4>Chain position</h4>
+
+<p>
+Given a basis $(a, b)$, $(c, d)$, we can write any key $(x, y)$ on the keyboard as
+</p>
+
+<div>
+$$
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+    =
+p
+\begin{bmatrix}
+    a \\
+    b \\
+\end{bmatrix}
++
+q
+\begin{bmatrix}
+    c \\
+    d \\
+\end{bmatrix}
+$$
+</div>
+
+<p>
+with integer $p$ and $q$. We can write this as
+</p>
+
+<div>
+$$
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+    =
+\begin{bmatrix}
+    a & c \\
+    b & d \\
+\end{bmatrix}
+\begin{bmatrix}
+    p \\
+    q \\
+\end{bmatrix}
+$$
+</div>
+
+<p>
+and solve for $(p, q)$, giving
+</p>
+
+<div>
+$$
+\begin{bmatrix}
+    p \\
+    q \\
+\end{bmatrix}
+    =
+\frac{1}{\Delta}
+\begin{bmatrix}
+    d & -c \\
+    -b & a \\
+\end{bmatrix}
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+$$
+</div>
+
+<p>
+where $\Delta = ad - bc = \pm 1$ since $(a, b)$, $(c, d)$ is a basis.
+Call $(p, q)$ the chain coordinates of $(x, y)$ with respect to basis $(a, b)$, $(c, d)$.
+</p>
+
+<p>
+Chain coordinates can often be interpreted musically.
+For example, say the fifth of the scale is mapped to $(a, b)$ and the octave to $(c, d)$.
+Then $p$ gives the position of a key $(x, y)$ in a chain of fifths on the keyboard,
+and $q$ gives the number of octaves moved.
+</p>
+
+<p>
+When the octave is at $(c, d)$, the chain coordinate $p$ corresponding to $(a, b)$ is called the chain position.
+</p>
+
+<h4>Modulus</h4>
+
+<p>
+Modulus is an extension of scale degree to a two dimensional keyboard.
+Given a basis $(a, b)$, $(c, d)$ we can assign modulus $m$ to $(a, b)$ and $n$ to $(c, d)$.
+Then the modulus for $(x, y)$ is defined as $r = mp + nq$,
+where $(p, q)$ are the chain coordinates of $(x, y)$.
+The chain position $p$ and modulus $r$ form coordinates for the keyboard, since
+</p>
+
+<div>
+$$
+\begin{aligned}
+\begin{bmatrix}
+    p \\
+    r \\
+\end{bmatrix}
+    &=
+\begin{bmatrix}
+    1 & 0 \\
+    m & n \\
+\end{bmatrix}
+\begin{bmatrix}
+    p \\
+    q \\
+\end{bmatrix} \\
+    &=
+\begin{bmatrix}
+    1 & 0 \\
+    m & n \\
+\end{bmatrix}
+\frac{1}{\Delta}
+\begin{bmatrix}
+    d & -c \\
+    -b & a \\
+\end{bmatrix}
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix} \\
+    &=
+\frac{1}{\Delta}
+\begin{bmatrix}
+    d & -c \\
+    dm - bn & -cm + an \\
+\end{bmatrix}
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+\end{aligned}
+$$
+</div>
+
+<p>
+which can be inverted to give
+</p>
+
+<div>
+$$
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+    =
+\frac{1}{n}
+\begin{bmatrix}
+    -cm + an & c \\
+    -dm + bn & d \\
+\end{bmatrix}
+\begin{bmatrix}
+    p \\
+    r \\
+\end{bmatrix}
+$$
+</div>
+
+<p>
+Modulus allows us to represent scale tones which come in multiple inflections with different pitches. 
+For example, you could map a 22-tone scale to modulus twelve,
+viewing it as a 12-tone scale in which ten of the notes come in two inflections.
+</p>
+
+<h3>Notation</h3>
+
+<p>
+Say the fifth is at $(a, b)$ on the keyboard and the octave at $(c, d)$.
+Pick a step $(e, f)$ to represent a 'comma' on the keyboard — this we pick for our convenience,
+but good choices are often where say $81/80$ or $64/63$ would be mapped by the harmonic template.
+Then if we can write a key at $(x, y)$ as
+</p>
+
+<div>
+$$
+\begin{bmatrix}
+    x \\
+    y \\
+\end{bmatrix}
+    =
+u
+\begin{bmatrix}
+    a \\
+    b \\
+\end{bmatrix}
+    +
+v
+\begin{bmatrix}
+    c \\
+    d \\
+\end{bmatrix}
+    +
+w
+\begin{bmatrix}
+    e \\
+    f \\
+\end{bmatrix}
+$$
+</div>
+
+<p>
+where $u$, $v$, and $w$ are integers,
+we can use the number of fifths $u$ and number of commas $w$ to define a notation.
+</p>
+
+<p>
+The number of fifths $u$ determines the start of the note name according to
+</p>
+
+<table>
+  <thead><tr><th>Fifths</th><td>…</td><td>−3</td><td>−2</td><td>−1</td><td>0</td><td>+1</td><td>+2</td><td>+3</td><td>+4</td><td>+5</td><td>+6</td><td>+7</td><td>…</td></tr></thead>
+  <tbody><tr><th>Name</th><td>…</td><td>E♭</td><td>B♭</td><td>F</td><td>C</td><td>G</td><td>D</td><td>A</td><td>E</td><td>B</td><td>F♯</td><td>C♯</td><td>…</td></tr></tbody>
+</table>
+
+<p>
+Here chain positions from $-1$ through $+5$ are named as F, C, G, D, A, E, B,
+and the pattern continues by adding a $\sharp$ to go up 7 fifths or a $\flat$ to go down seven fifths. The note name is then completed by adding $w$ slashes, where $w$ is the number of commas.
+We use a forward slash / if $w$ is positive or a backslash \ if $w$ is negative.
+</p>
+
+<p>
+If the fifth is at $(a, b)$ and the octave is at $(c, d)$,
+$ad - bc$ gives the number of chains of fifths the keyboard will be split into.
+This is useful since it tells us how many slashes will be required in the notation.
+</p>
 
 <h2 id="gral-search">gral-search</h2>
 <p>Apply the Gral method to 10/17:</p>
