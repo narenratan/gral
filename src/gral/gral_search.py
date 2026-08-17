@@ -180,6 +180,70 @@ Left    &   Right   &   Mediant &   $a$  &  $b$  &  $c$  &  $d$  &  $s$  &  $t$ 
     print(r"\end{tabular}")
 
 
+def print_html(df):
+    use_k = set(df["k"]) != {0}
+    headers = ["Left", "Right", "Mediant"] + (["k"] if use_k else []) + ["a", "b", "c", "d", "s", "t"]
+    print("<table>")
+    print("  <thead>")
+    print("    <tr>")
+    for h in headers:
+        print(f"      <th>{h}</th>")
+    print("    </tr>")
+    print("  </thead>")
+    print("  <tbody>")
+    left_prev = None
+    right_prev = None
+    med_prev = None
+    blank = ""
+    for row in df.itertuples():
+        left = row.left
+        right = row.right
+        med = row.mediant
+        left_cell = left if left != left_prev else blank
+        right_cell = right if right != right_prev else blank
+        med_cell = med if med != med_prev else blank
+        cells = [left_cell, right_cell, med_cell]
+        cells += ([str(row.k)] if use_k else [])
+        cells += [str(row.a), str(row.b), str(row.c), str(row.d), str(row.s), str(row.t)]
+        print("    <tr>")
+        for cell in cells:
+            print(f"      <td>{cell}</td>")
+        print("    </tr>")
+        left_prev = left
+        right_prev = right
+        med_prev = med
+    print("  </tbody>")
+    print("</table>")
+
+
+def print_wiki(df):
+    use_k = set(df["k"]) != {0}
+    headers = ["Left", "Right", "Mediant"] + (["k"] if use_k else []) + ["a", "b", "c", "d", "s", "t"]
+    print('{| class="wikitable"')
+    print("! " + " !! ".join(headers))
+    left_prev = None
+    right_prev = None
+    med_prev = None
+    k_max = df["k"].max()
+    blank = ""
+    for row in df.itertuples():
+        left = row.left
+        right = row.right
+        med = row.mediant
+        print("|-")
+        left_cell = left if left != left_prev else blank
+        right_cell = right if right != right_prev else blank
+        med_cell = med if med != med_prev else blank
+        cells = [left_cell, right_cell, med_cell]
+        cells += ([str(row.k)] if use_k else [])
+        cells += [str(row.a), str(row.b), str(row.c), str(row.d), str(row.s), str(row.t)]
+        print("| " + " || ".join(cells))
+        left_prev = left
+        right_prev = right
+        med_prev = med
+    print("|}")
+
+
 def main(arg_list=None):
     parser = argparse.ArgumentParser(description="Apply Erv Wilson's Gral method")
     parser.add_argument("m", type=str, help="Number to search for is m/n")
@@ -203,6 +267,17 @@ def main(arg_list=None):
         action="store_true",
         help="Print table in LaTeX format (uses booktabs LaTeX package)",
     )
+    parser.add_argument(
+        "-w",
+        "--wiki",
+        action="store_true",
+        help="Print table in MediaWiki format",
+    )
+    parser.add_argument(
+        "--html",
+        action="store_true",
+        help="Print table in HTML format",
+    )
 
     args = parser.parse_args(arg_list)
 
@@ -218,6 +293,10 @@ def main(arg_list=None):
 
     if args.latex:
         print_latex(df)
+    elif args.wiki:
+        print_wiki(df)
+    elif args.html:
+        print_html(df)
     else:
         print_ascii(df)
 
